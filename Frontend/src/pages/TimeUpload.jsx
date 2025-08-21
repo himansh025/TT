@@ -68,7 +68,7 @@ const TimeUpload = () => {
         
         // Using axios.post which is the correct method for file uploads
         const response = await axios.post(
-          'http://38.137.14.116:3000/upload',
+          'https://timetable-backend-five.vercel.app/upload',
           formData,
           {
             headers: {
