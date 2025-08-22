@@ -1,7 +1,9 @@
-require("dotenv").config();
+require("dotenv").config({});
 const { MongoClient } = require("mongodb");
-const uri =
-  "mongodb+srv://MongoYkashyap:jVzxoQnVftQ4QLjn@face-encodings.uifdumj.mongodb.net/?retryWrites=true&w=majority&appName=Face-Encodings";
+  const uri = process.env.MONGO_URI 
+if(!uri){
+  return "mongo uri is not there"
+}
 
 const client = new MongoClient(uri);
 

@@ -1,5 +1,6 @@
 const express = require("express");
 const connectToMongoDB = require("./database");
+const dotenv= require("dotenv")
 const path = require("path");
 const app = express();
 const port = 3000;
@@ -7,6 +8,7 @@ const cors = require("cors");
 var cln;
 
 // ***************************************************************
+dotenv.config({});
 
 const { connectDB } = require("./config/db");
 const authRoutes = require("./routes/authRoutes");

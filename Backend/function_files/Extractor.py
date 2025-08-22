@@ -2,7 +2,6 @@ try:
     import sys
     from pymongo import MongoClient
     import xlwings as xw
-    from datetime import datetime
     from datetime import datetime, timezone
 
     import os
@@ -46,26 +45,30 @@ try:
     ]
 
     client = MongoClient(
-        "mongodb+srv://MongoYkashyap:jVzxoQnVftQ4QLjn@face-encodings.uifdumj.mongodb.net"
+        "mongodb+srv://himanshudeolia0825:1hqVCAshDg50eFiD@cluster0.0cosamw.mongodb.net"
     )
 
     # Select the database and collection
     db = client["College_Live_Project"]
+    # print("db",db)
     collection = db["timetable"]
     # collection = db["vansh_test_timetable"]
 
-    # **********************************     ABOVE THIS LINE ARE THE GLOBAL VARIABLES  *********************************************************************************************************************************************
+    # **********************************     ABOVE THIS LINE ARE THE GLOBAL VARIABLES 
+    #  
     def open_and_load_Excel(filename, sheetname):
+
         global wb, sheet
 
         wb = xw.Book(filename)
-
         sheet = wb.sheets[sheetname]
+        print("Workbook opened:", wb)
+        print("Sheet:", sheet)
 
     def unmerger_and_copy(sheet):
 
         # Define the specific range to unmerge and copy values
-        specific_range = sheet.range("A1:Z235")
+        specific_range = sheet.range("A1:AH285")
 
         # Loop through merged cells in the range
         for cell in specific_range:
@@ -80,40 +83,32 @@ try:
                     sub_cell.Value = value
 
     def range_And_Classes_Extractor(sheet):
-        global break_point, classes, rngArr
+        global classes, rngArr
 
-        b_column_range = sheet.range("B1").expand(
-            "down"
-        )  # Expands to all non-empty cells
+        b_column_range = sheet.range("B3").expand("down")
 
-        # Print row index and value
         for cell in b_column_range:
-            # print(f"Row {cell.row}: {cell.value}")
-
-            indx = cell.row
             cls = cell.value
-
+            if not cls:
+                continue
+            if "CLASS" in str(cls).upper():
+                continue
             if cls not in classes:
+                classes.append(cls)
 
-                if "Class" in cls or "CLASS" in cls:
-                    # print("skipped")
-                    pass
-                else:
-                    classes.append(cls)
-            else:
-                break_point = indx
-                rngArr.append(f"B{1}:Z{break_point-1}")
-                # arr = []
-                break
+        # ✅ Fixed ranges for each day
+        rngArr = [
+        "B3:Z47",    # Monday
+        "B48:Z90",   # Tuesday
+        "B91:Z134",  # Wednesday
+        "B135:Z177", # Thursday
+        "B178:Z219", # Friday
+        "B220:Z261"  # Saturday
+        ]
 
-        for i in range(5):
-
-            first = f"{break_point+i*len(classes)}"
-            second = f"{break_point+(i+1)*len(classes)-1}"
-            rngArr.append(f"B{first}:Z{second}")
-            sheet.range("DY1").value = "BCA-1A"
-
-        print(rngArr)
+        sheet.range("DY1").value = "BCA-1A"
+        print("Classes Extracted:", classes)
+        print("Ranges:", rngArr)
 
     def create_v_lookup(sheet):
 
@@ -125,12 +120,12 @@ try:
                     pickup = i + 3
                 else:
                     pickup = i + 2
-                # print(f"E{alpha[i]}{row+1}",end=" ")
+                print(f"E{alpha[i]}{row+1}",end=" ")
 
-                # print(f"=VLOOKUP(DY1,{rngArr[row]},{i+2},0)",end="  |")
+                print(f"=VLOOKUP(DY1,{rngArr[row]},{i+2},0)",end="  |")
 
                 sheet.range(f"E{alpha[i]}{row+1}").value = (
-                    f"=VLOOKUP(DY1,{rngArr[row]},{pickup},0)"
+                f"=VLOOKUP(DY1,{rngArr[row]},{pickup},0)"
                 )
 
     def write_days(sheet):
@@ -139,6 +134,7 @@ try:
             sheet.range(f"DZ{i+1}").value = daysArr[i]
 
     def AddToMongo(doc):
+        # print("doc",doc)
         try:
             # Connect to the MongoDB server
             global collection
@@ -240,7 +236,7 @@ try:
 
                 AddToMongo(
                     {
-                        "class": cls.replace(" ", "-").upper(),
+                        "class": cls.replace(" ", "-").replace(".", "").upper(),
                         "day": sheet.range(f"DZ{daynum+1}").value,
                         "timetable": extracted_tt,
                         "time": datetime.now(
@@ -252,8 +248,12 @@ try:
 
     # filename =  os.getcwd()+"../uploads/"+ sys.argv[1]
     filename = f"{os.getcwd()}\\uploads\\{sys.argv[1]}"
+    filename1 = os.path.join(os.getcwd(), "uploads", sys.argv[1])
+    print("filename",filename)
+    print("filename d",filename1)
 
     open_and_load_Excel(filename, "Sheet1")
+    print("Outside:", wb, sheet)
 
     unmerger_and_copy(sheet)
 
@@ -282,7 +282,8 @@ try:
 
     """
 
-except:
-    if wb:
-        wb.save()
-        wb.close()
+except :
+      if wb:  
+            wb.save()
+            wb.close()
+   

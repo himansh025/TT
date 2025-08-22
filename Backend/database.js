@@ -1,7 +1,13 @@
 const { MongoClient } = require("mongodb");
+const  dotenv =require('dotenv')
+dotenv.config({});
 
 // Connection URI
-const uri = process.env.mongo_uri || "mongodb+srv://MongoYkashyap:jVzxoQnVftQ4QLjn@face-encodings.uifdumj.mongodb.net/?retryWrites=true&w=majority"
+const uri = process.env.MONGO_URI 
+// console.log(uri) 
+if(!uri){
+  return "mongo uri is not there"
+}
 
 // Database Name
 const dbName = "College_Live_Project"; // Set the database name to "dhawan"
