@@ -18,9 +18,7 @@ const lecTeller = () => {
   const h = dateobj.getHours();
   const m = dateobj.getMinutes();
   const s = dateobj.getSeconds();
-
   const time = h * 10000 + m * 100 + s;
-
   // console.log(time);
 
   if (time >= 80001 && time <= 90000) {
@@ -30,7 +28,7 @@ const lecTeller = () => {
   } else if (time >= 100001 && time <= 110500) {
     lectureNumber = 2;
   } else if (time >= 110501 && time <= 112500) {
-    lectureNumber = 11;
+    lectureNumber = "Break";
   } else if (time >= 112501 && time <= 122500) {
     lectureNumber = 3;
   } else if (time >= 122501 && time <= 133000) {
@@ -57,7 +55,6 @@ const lecTeller = () => {
       break;
     case 4:
       dayname = "thursday";
-
       break;
     case 5:
       dayname = "friday";
@@ -80,7 +77,7 @@ router.post("/", async (req, res) => {
     let final_Arr = [];
     const { cls } = req.body;
 
-    console.log("class : ", cls);
+    // console.log("class : ", cls);
 
     if (!cls) {
       res.status(400).json({ error: "No class Found !" });
@@ -93,8 +90,10 @@ router.post("/", async (req, res) => {
     let data = lecTeller();
     let dayname = data[1];
     let lectureNow_num = data[0];
-    console.log(data);
+    // console.log(data);
     // let lectureNext = 2
+
+
 
     if (dayname == "sunday") {
       return res.send([
@@ -127,88 +126,96 @@ router.post("/", async (req, res) => {
       .find({ class: cls, day: dayname })
       .toArray();
 
-    console.log(results[0])
+    // console.log(results[0])
 
     if (!results.length) {
       return res.status(404).json({ error: "Class not in db" });
     }
 
-    console.log(results);
+    // console.log(results);
 
     let newTT = results[0]["timetable"];
-// console.log("new tt",newTT)
+    // console.log("new tt",newTT)
     leftTT = newTT.slice(lectureNow_num - 1);
     // console.log("keft tt",newTT)
 
-    leftTT.map((lecture) => {
-      let temptype = "lecture";
+    if (lectureNow_num === "Break") {
+      // Insert break slot as "now"
+      final_Arr.push({
+        id: "break",
+        status: "now",
+        subject: "Tea Break",
+        teacher: "-",
+        venue: "-",
+        time: "11:05 - 11:25",
+        type: "break",
+      });
 
-      console.log("idn",lecture);
 
-      // if (!lecture || !lecture[0]) {
-      //   console.log("Invalid lecture:", lecture);
-      //   return res.status(500).json({ error: "Lecture data is invalid" });
-      // }
+      const breakIndex = newTT.findIndex(l => l[0] === "Break");
+      const afterBreakTT = newTT.slice(breakIndex + 1); // skip past lectures
+      // console.log(breakIndex,afterBreakTT)
+      afterBreakTT.slice(2).forEach((lecture) => {
+        const subjectText = lecture[0];
+        let temptype = "lecture";
 
-      const subjectText = lecture[0];
-      console.log("subtext",subjectText);
+        if (/PLACEMENT/i.test(subjectText)) {
+          temptype = "placement";
+        } else if (/LUNCH/i.test(lecture[1]) || /LUNCH/i.test(subjectText)) {
+          temptype = "Lunch break";
+        } else if (/FREE/i.test(subjectText) || /Free/i.test(lecture[1])) {
+          temptype = "idle";
+        } else if (/MERN|Android|UI\/UX|LIVE PROJECT/i.test(subjectText)) {
+          temptype = "major_project";
+        }
 
-      // Determine type
-      if (/PLACEMENT/i.test(subjectText)) {
-        console.log("1")
-        temptype = "placement";
-      } else if (/LUNCH/i.test(lecture[1]) || /LUNCH/i.test(subjectText)) {
-        console.log("2")
-        temptype = "Lunch break";
-      } else if (/FREE/i.test(subjectText) || /Free/i.test(lecture[1])) {
-        console.log("3")
-        temptype = "idle";
-      } else if (/MERN|Android|UI\/UX|LIVE PROJECT/i.test(subjectText)) {
-        console.log("4")
-        temptype = "major_project";
-      }
+        const lectureIndex = newTT.indexOf(lecture);
+        const lectureTime = lectureTimeArr[lectureIndex];
 
-     
-  const lectureIndex = newTT.indexOf(lecture);
-  const isNow = leftTT.indexOf(lecture) === 0;
-  const lectureTime = lectureTimeArr[lectureIndex];
-console.log(lectureIndex,isNow,lectureTime)
-  // Handle major project format
-  if (temptype === "major_project") {
-    const str = subjectText;
-    const domains = str.split(" | ");
+        final_Arr.push({
+          id: lectureIndex + 1,
+          status: "upcoming",
+          subject: subjectText,
+          teacher: lecture[1],
+          venue: lecture[2],
+          time: lectureTime,
+          type: temptype,
+        });
+      });
 
-    const farr = domains.map((data) => {
-      const parts = data.split(" - ").map(part => part.trim());
-      return {
-        subject: parts[0],
-        teacher: parts[1],
-        venue: parts[2],
-      };
-    });
+    } else {
 
-    final_Arr.push({
-      id: lectureIndex + 1,
-      status: isNow ? "now" : "upcoming",
-      data: farr,
-      time: lectureTime,
-      type: temptype,
-    });
-    console.log("final",final_Arr)
+      leftTT.forEach((lecture, idx) => {
+        const subjectText = lecture[0];
+        let temptype = "lecture";
 
-  } else {
-    // Regular lecture format
-    final_Arr.push({
-      id: lectureIndex + 1,
-      status: isNow ? "now" : "upcoming",
-      subject: subjectText,
-      teacher: lecture[1],
-      venue: lecture[2],
-      time: lectureTime,
-      type: temptype,
-    });
-  }
-});
+        if (/PLACEMENT/i.test(subjectText)) {
+          temptype = "placement";
+        } else if (/LUNCH/i.test(lecture[1]) || /LUNCH/i.test(subjectText)) {
+          temptype = "Lunch break";
+        } else if (/FREE/i.test(subjectText) || /Free/i.test(lecture[1])) {
+          temptype = "idle";
+        } else if (/MERN|Android|UI\/UX|LIVE PROJECT/i.test(subjectText)) {
+          temptype = "major_project";
+        }
+
+        const lectureIndex = newTT.indexOf(lecture);
+        const isNow = idx === 0; // only first lecture = now
+        const lectureTime = lectureTimeArr[lectureIndex];
+
+        final_Arr.push({
+          id: lectureIndex + 1,
+          status: isNow ? "now" : "upcoming",
+          subject: subjectText,
+          teacher: lecture[1],
+          venue: lecture[2],
+          time: lectureTime,
+          type: temptype,
+        });
+      });
+    }
+
+
 
     res.send(final_Arr);
   } catch (e) {
