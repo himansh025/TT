@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Book, Laptop, Coffee, ChevronDown, Utensils, Users, Calendar, X } from "lucide-react";
 import axiosInstance from "../Config/apiconfig.js";
-import {
-  IoLocationOutline,
-  IoBook,
-  IoTimeOutline,
-} from "react-icons/io5";
+import CollegeClosedComponent from "../Comp/Lecture/CollegeClosedComponent.jsx";
+import RegularLecture from "../Comp/Lecture/RegularLecture.jsx";
+import Loader from "../Comp/Loader.jsx";
 
 // Initialize departments structure
 const initialDepartments = {
@@ -15,10 +13,10 @@ const initialDepartments = {
 const LiveLectures = () => {
   const [departments, setDepartments] = useState(initialDepartments);
   const [selectedDepartment, setSelectedDepartment] = useState("ET");
-  const [selectedClass, setSelectedClass] = useState("BCA-1A");
+  const [selectedClass, setSelectedClass] = useState("");
   const [isBlocksOpen, setIsBlocksOpen] = useState(false);
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isCollegeClosed, setIsCollegeClosed] = useState(false);
 
 
@@ -26,22 +24,11 @@ const LiveLectures = () => {
   useEffect(() => {
     const loadDepartmentsAndClasses = async () => {
       try {
-       
+
         await fetchAllClasses();
 
-        // Try to get departments from localStorage first
-        // const storedDepartments = localStorage.getItem("departments");
-
-        // if (storedDepartments) {
-        //   // If data exists in localStorage, use it
-        //   const parsedDepartments = JSON.parse(storedDepartments);
-        //   setDepartments(parsedDepartments);
-        // } else {
-        //   // If not in localStorage, fetch from API
-        //   await fetchAllClasses();
-        // }
       } catch (error) {
-        // console.error("Error loading departments:", error);
+        console.error("Error loading departments:", error);
       }
     };
 
@@ -51,6 +38,7 @@ const LiveLectures = () => {
   // Function to fetch all classes from API
   const fetchAllClasses = async () => {
     try {
+      
       const response = await axiosInstance.get(`/api/classes/getAll`);
 
       if (response.status !== 200) {
@@ -76,6 +64,9 @@ const LiveLectures = () => {
     } catch (error) {
       // console.error("Classes fetch failed:", error);
     }
+     finally {
+      setLoading(false);
+    }
   };
 
   const handleDepartmentChange = (dept) => {
@@ -89,7 +80,7 @@ const LiveLectures = () => {
     if (value === null || value === undefined) return "";
     return String(value); // Convert any value to string safely
   };
-  
+
   // Safe toLowerCase function that handles non-string values
   const safeLowerCase = (value) => {
     const str = safeString(value);
@@ -155,7 +146,7 @@ const LiveLectures = () => {
 
   // Check if a lecture is special (like break, meeting, etc.) - using safeLowerCase
   const isSpecialLecture = (lecture) => {
-    const specialTypes = ["lunch", "tea", "break", "meeting", "closed","sunday", "free"];
+    const specialTypes = ["lunch", "tea", "break", "meeting", "closed", "sunday", "free"];
     return specialTypes.some(type =>
       safeLowerCase(lecture.type).includes(type) ||
       safeLowerCase(lecture.status).includes(type) ||
@@ -175,7 +166,7 @@ const LiveLectures = () => {
     else if (safeLowerCase(lecture.status).includes("sunday")) {
       return "Sunday";
     }
-      else if (safeLowerCase(lecture.subject).includes("tea") || safeLowerCase(lecture.venue).includes("tea")) {
+    else if (safeLowerCase(lecture.subject).includes("tea") || safeLowerCase(lecture.venue).includes("tea")) {
       return "Tea Break";
     } else if (safeLowerCase(lecture.subject).includes("meeting") || safeLowerCase(lecture.type).includes("meeting")) {
       if (safeLowerCase(lecture.subject).includes("friday")) {
@@ -221,111 +212,23 @@ const LiveLectures = () => {
     }
   };
 
-  // College Closed UI Component
-  const CollegeClosedComponent = () => {
-    return (
-      <div className="bg-white rounded-lg shadow-md border border-blue-300 overflow-hidden w-full">
-        <div className="p-8 flex flex-col items-center justify-center text-center">
-          <div className="mb-4">
-            <div className="w-24 h-24 bg-amber-900 rounded-full flex items-center justify-center relative">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/4 w-0 h-0 border-l-8 border-r-8 border-b-16 border-l-transparent border-r-transparent border-b-amber-900"></div>
-              <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-amber-300 rounded-full"></div>
-              <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-amber-300 rounded-full"></div>
-              <div className="flex flex-col items-center justify-center">
-                <span className="text-amber-300 font-bold text-lg">CLOSE</span>
-                <div className="w-16 h-0.5 bg-amber-300 mt-1"></div>
-              </div>
-            </div>
-          </div>
-          <h3 className="text-2xl font-bold mb-2 text-gray-800">College Closed</h3>
-        </div>
-      </div>
-    );
-  };
 
-  // Render regular lecture - now handling non-string values safely
-  const renderRegularLecture = (lecture, type) => {
-    if (lecture.type === "major_project" && Array.isArray(lecture.data)) {
-      return lecture.data.map((domain, idx) => (
-        <div
-          key={`${lecture.id}-${idx}`}
-          className={` rounded-xl p-4 shadow-xl hover:shadow-2xl hover:scale-105 transition-all bg-white border-l-4 border-blue-500 duration-300 w-full max-w-md mx-auto`}
-        >
-          <div className="mb-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              {type === "now" ? "NOW" : "NEXT"}
-            </span>
-          </div>
-
-          <div className="flex items-center text-blue-600 font-semibold text-md mb-2">
-            <IoTimeOutline className="w-6 h-6 mr-2 text-blue-500" />{lecture?.time}
-          </div>
-
-          <div className=" justify-between text-sm text-gray-700 mb-2">
-            <div className="flex ">
-              <IoLocationOutline className="w-6 mr-2 h-6 text-blue-500" />
-              Venue :
-              <span className="font-semibold ml-2">{safeString(domain.venue)}  </span>
-            </div>
-            <div className="flex items-center text-lg font-bold  mb-1">
-              <IoBook className="w-6 h-6 mr-3 text-yellow-500" />
-              Subject : {safeString(domain.subject).toUpperCase()}
-            </div>
-          </div>
-
-          <p className="text-sm text-blue-700 font-semibold">
-            Teacher Code: <span className="font-normal">{safeString(domain.teacher).toUpperCase()}</span>
-          </p>
-
-        </div>
-      ));
-    }
-
-    return (
-      <div
-        key={lecture.id}
-        className={` rounded-xl p-4 shadow-xl hover:shadow-2xl hover:scale-105 transition-all bg-white border-l-4 border-blue-500 duration-300 w-full max-w-md mx-auto`}>
-          <div className="mb-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              {type === "now" ? "NOW" : "NEXT"}
-            </span>
-          </div>
-
-          <div className="flex items-center text-blue-600 font-semibold text-md mb-2">
-            <IoTimeOutline className="w-6 h-6 mr-2 text-blue-500" />{lecture.time}
-          </div>
-
-
-   <div className=" justify-between text-sm text-gray-700 mb-2">
-            <div className="flex ">
-            <IoLocationOutline className="w-6 mr-2 h-6 text-blue-500" />
-            Venue :
-            <span className="font-semibold ml-2">{safeString(lecture.venue)}  </span>
-            </div>   <div className="flex items-center text-lg font-bold  mb-1">
-                        <IoBook className="w-6 h-6 mr-3 text-yellow-500" />
-                         Subject : {safeString(lecture.subject).toUpperCase()}
-                         {lecture.type === "lab" ? "- LAB" : ""}
-                        </div>
-                      </div>
-                        <p className="text-sm text-blue-700 font-semibold">
-                        Teacher Code: <span className="font-normal">{safeString(lecture.teacher).toUpperCase()}</span>
-                       </p>
-      </div>
-    );
-  };
 
   // Render special lecture
   const renderSpecialLecture = (lecture, type) => {
     const title = getSpecialLectureTitle(lecture);
     const timeRange = getTimeRange(lecture);
 
+      if(loading){
+     retrun (<Loader/>)
+  }
     return (
       <div
         key={lecture.id}
         className=" bg-green-50 border-l-4 border-green-500 rounded-lg  pb-2 shadow-xl text-center hover:shadow-2xl hover:scale-105 transition-all duration-300"
       >
-    
-         
+
+
         <div className="p-4 flex flex-col items-center justify-center text-center h-full py-6">
           <div className="mb-4">
             <div className={`p-2 ${type === "now" ? "bg-green-100" : "bg-gray-100"} rounded-full inline-block`}>
@@ -423,7 +326,7 @@ const LiveLectures = () => {
             className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
             disabled={loading || !selectedClass}
           >
-            {loading ? "Loading..." : "GO"}
+            {loading && selectedClass ? "Loading..." : "GO"}
           </button>
         </div>
 
@@ -443,24 +346,31 @@ const LiveLectures = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {data.slice(0, 1).map((lecture) => {
                   const isSpecial = isSpecialLecture(lecture);
-                  return isSpecial
-                    ? renderSpecialLecture(lecture, "now")
-                    : renderRegularLecture(lecture, "now");
+                  return isSpecial ? (
+                    renderSpecialLecture(lecture, "now")
+                  ) : (
+                    <>
+                      <RegularLecture lecture={lecture} now="now" />
+                    </>
+                  );
                 })}
               </div>
             </div>
 
             {/* Next Lectures Section */}
-            { data.length>1 &&(
+            {data.length > 1 && (
               <div>
-  
+
                 <h2 className="text-xl font-semibold mb-4">Next lectures</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  { data.slice(1).map((lecture) => {
+                  {data.slice(1).map((lecture) => {
                     const isSpecial = isSpecialLecture(lecture);
-                    return isSpecial
-                      ? renderSpecialLecture(lecture, "next")
-                      : renderRegularLecture(lecture, "next");
+                    return isSpecial ? (renderSpecialLecture(lecture, "next"))
+                      : (
+                        <>
+                          <RegularLecture lecture={lecture} now="next" />
+                        </>
+                      );
                   })}
                 </div>
               </div>
@@ -469,17 +379,9 @@ const LiveLectures = () => {
           </>
         )}
 
-        {loading && (
-          <div className="flex justify-center items-center py-12">
-            <div className="text-lg font-medium text-gray-500">Loading lectures...</div>
-          </div>
-        )}
+      
 
-        {!loading && selectedClass && data.length === 0 && !isCollegeClosed && (
-          <div className="flex justify-center items-center py-12">
-            <div className="text-lg font-medium text-gray-500">No lectures found. Please select different criteria.</div>
-          </div>
-        )}
+       
       </div>
     </div>
   );

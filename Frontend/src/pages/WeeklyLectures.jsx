@@ -5,6 +5,7 @@ import Button from "../Comp/Button";
 import { toast } from "react-toastify";
 import axiosInstance from "../Config/apiconfig";
 import {IoLocationOutline,IoBook,IoTimeOutline} from "react-icons/io5";
+import Loader from "../Comp/Loader";
 
 const sampleBlocks = ["ET Block"];
 const sampleClasses = {
@@ -20,7 +21,7 @@ const WeeklyLectures = () => {
   const [selectedDay, setSelectedDay] = useState("Monday");
   const [classes, setClasses] = useState([]);
   const [schedule, setSchedule] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showValidation, setShowValidation] = useState(false);
 
   useEffect(() => {
@@ -38,6 +39,8 @@ const WeeklyLectures = () => {
       setClasses(arr);
     } catch (error) {
       toast.error(error.message);
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -71,27 +74,16 @@ const WeeklyLectures = () => {
       setSchedule(transformSchedule(response.data));
     } catch (error) {
       toast.error(error.message);
-    }
-    setLoading(false);
-  };
-
-  const getIconForScheduleItem = (type, title) => {
-    switch (type) {
-      case "BREAK":
-        return title?.toLowerCase()?.includes("tea") ? (
-          <Coffee className="w-8 h-8 text-gray-800" />
-        ) : (
-          <UtensilsCrossed className="w-8 h-8 text-orange-500" />
-        );
-      case "MEETING":
-        return <Users2 className="w-8 h-8 text-gray-800" />;
-      case "FREE":
-        return <Users className="w-8 h-8 text-gray-800" />;
-      default:
-        return <BookCopy className="w-10 h-10 text-gray-800" />;
+    }finally{
+      setLoading(false);
     }
   };
 
+ if(loading){
+  return(
+    <Loader/>
+  )}
+ 
   return (
     <div className="min-h-screen text-gray-800 bg-gray-50 p-6 w-full mx-auto rounded-lg shadow-md">
       <h1 className="text-3xl font-bold text-center mb-6 text-blue-700">Weekly Lectures</h1>
@@ -198,7 +190,7 @@ const WeeklyLectures = () => {
       <div className="text-center">
         <Button
           onClick={handleFetch}
-          text={loading ? "Loading..." : "Get Lectures"}
+          text={loading&& selectedClass ? "Loading..." : "Get Lectures"}
           className="font-semibold px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300"
         />
       </div>

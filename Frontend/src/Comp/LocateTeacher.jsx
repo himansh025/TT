@@ -9,17 +9,25 @@ import {
 } from "react-icons/io5";
 import axiosInstance from "../Config/apiconfig.js";
 import { useEffect } from "react";
+import Loader from "./Loader.jsx";
 
 const LocateTeacher = () => {
   const [selectedTeacher, setSelectedTeacher] = useState("");
   const [selectedDay, setselectedDay] = useState("monday");
   const [teachers, setTeachers] = useState([]);
   const [lectures, setLectures] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const getAllTeachers = async () => {
-    const response = await axiosInstance.get(`/api/teachers/getAll`);
-    let data = response.data;
-    setTeachers(data.result || []);
+    try {
+      const response = await axiosInstance.get(`/api/teachers/getAll`);
+      let data = response.data;
+      setTeachers(data.result || []);
+    } catch (error) {
+      console.error(error)
+    }finally{
+      setLoading(false)
+    }
   };
 
   let timingArr = [
@@ -43,13 +51,21 @@ const LocateTeacher = () => {
 
   const getTeacherTimeTable = async (tcode, sday) => {
     // console.log(tcode,selectedDay);
-    const payload = { req_day: sday, teacherCode: tcode };
-    const response = await axiosInstance.post(`/teacher_timetable`, payload);
-    let data = await response.data;
-        console.log(data);
-
-    const arrayValues = Object.values(data);
-    setLectures(arrayValues);
+    try {
+      setLoading(true)
+      const payload = { req_day: sday, teacherCode: tcode };
+      const response = await axiosInstance.post(`/teacher_timetable`, payload);
+      let data = await response.data;
+          console.log(data);
+  
+      const arrayValues = Object.values(data);
+      setLectures(arrayValues);
+    } catch (error) {
+      console.error(error);
+      
+    }finally{
+      setLoading(false)
+    }
   };
 
   useLayoutEffect(() => {
@@ -60,6 +76,11 @@ const LocateTeacher = () => {
     getTeacherTimeTable(selectedTeacher, selectedDay);
   }, [selectedTeacher, selectedDay]);
 
+  if(loading){
+    return(
+      <Loader/>
+    )
+  }
   return (
     <div className=" min-h-screen mt-5 md:mt-10 flex flex-col items-center py-10 px-4">
       <div className="w-full max-w-6xl">
