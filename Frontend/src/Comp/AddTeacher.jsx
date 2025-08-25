@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import { Trash2, Edit, ChevronDown, X } from "lucide-react";
 import Pagination from "./Pagination";
 import axiosInstance from "../Config/apiconfig.js";
-import TeacherFormModal from './TeacherFormModal.jsx'
+import TeacherFormModal from './TeacherFormModel.jsx'
 import ConfirmationModal from './ConfirmationModal.jsx'
 
 
@@ -67,11 +67,10 @@ const SortDropdown = memo(({ options, value, onChange, label }) => {
             {options.map((option) => (
               <button
                 key={option}
-                className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
-                  option === value
+                className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${option === value
                     ? "bg-gray-50 text-blue-600 font-medium"
                     : "text-gray-700"
-                }`}
+                  }`}
                 onClick={() => handleSelect(option)}
                 role="menuitem"
               >
@@ -95,7 +94,7 @@ const TeachersLayout = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -107,9 +106,9 @@ const TeachersLayout = () => {
     const totalItems = teachers.length;
     const itemsPerPage = 8;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    return {totalItems, totalPages, itemsPerPage}
+    return { totalItems, totalPages, itemsPerPage }
   }, [teachers]);
-  
+
   const sortedTeachers = useMemo(() => {
     const sorted = [...teachers];
 
@@ -126,10 +125,10 @@ const TeachersLayout = () => {
         return sorted;
     }
   }, [teachers, sortOption]);
-  
+
   const paginationContentStartIndex = (currentPage - 1) * paginationDetails.itemsPerPage;
   const filteredTeachers = sortedTeachers.slice(
-    paginationContentStartIndex, 
+    paginationContentStartIndex,
     paginationContentStartIndex + paginationDetails.itemsPerPage
   );
 
@@ -166,20 +165,20 @@ const TeachersLayout = () => {
   }, []);
 
   // Handler for opening the edit teacher modal
-const handleEdit = useCallback((teacher) => {
+  const handleEdit = useCallback((teacher) => {
     setCurrentTeacher(teacher);
     setIsEditModalOpen(true);
-  }, []);  
+  }, []);
 
   // Handler for opening the delete confirmation modal
   const handleDeleteClick = useCallback((teacherData) => {
-    console.log("id check",teacherData);
-    
+    console.log("id check", teacherData);
+
     const teacherToDelete = teachers.find(teacher => teacher.email === teacherData.email);
-    console.log("techer check",teacherToDelete);
+    console.log("techer check", teacherToDelete);
     setCurrentTeacher(teacherToDelete);
     setDeleteId(teacherData.email);
-    localStorage.setItem("deleteTeacher",teacherData.email ); // Similar to ClassListing approach
+    localStorage.setItem("deleteTeacher", teacherData.email); // Similar to ClassListing approach
     setIsDeleteModalOpen(true);
   }, [teachers]);
 
@@ -188,13 +187,13 @@ const handleEdit = useCallback((teacher) => {
   const handleAddSubmit = async (formData) => {
     setIsLoading(true);
     try {
-      const response = await axiosInstance.post(`/api/teachers/register`,formData,
+      const response = await axiosInstance.post(`/api/teachers/register`, formData,
         {
           headers: { "Content-Type": "application/json" },
         }
       );
 
-      toast.success(response?.data?.message ||"Teacher added successfully");  
+      toast.success(response?.data?.message || "Teacher added successfully");
       await fetchTeachers();
       setIsAddModalOpen(false);
     } catch (err) {
@@ -203,33 +202,33 @@ const handleEdit = useCallback((teacher) => {
       console.error("Error adding teacher:", err.response?.data || err.message);
     }
   };
-  
+
   // Handler for updating an existing teacher
   const handleEditSubmit = async (formData) => {
     try {
       setIsLoading(true);
       // Create a copy of the form data for updates
-      const updates = {...formData};
+      const updates = { ...formData };
       const existingEmail = currentTeacher.email;
-      
+
       // Handle password - remove if empty (unchanged)
       if (!updates.password || !updates.password.trim()) {
         delete updates.password;
       }
-      
+
       // Handle email - if it's unchanged (same as current), mark it for the backend
       if (updates.email === existingEmail) {
         updates.emailUnchanged = true;
       }
 
-      const response = await axiosInstance.put(`/api/teachers/update`,JSON.stringify({
+      const response = await axiosInstance.put(`/api/teachers/update`, JSON.stringify({
         existingEmail,
         updates
-      })); 
+      }));
       toast.success("Teacher updated successfully")
       await fetchTeachers();
       setIsEditModalOpen(false);
-      
+
     } catch (err) {
       setIsLoading(false);
       toast.error(err?.response?.data?.message || "Error Update Teacher");
@@ -241,12 +240,12 @@ const handleEdit = useCallback((teacher) => {
     setIsLoading(true);
     const email = currentTeacher.email;
     setIsDeleteModalOpen(false);
-  
+
     try {
       const response = await axiosInstance.delete(`/api/teachers/delete`, {
         data: { email },  // Send data in "data" property for DELETE request
       });
-  
+
       if (response.data) {
         await fetchTeachers();
         toast.success(response?.data?.message || " Deleting teacher Successfully");
@@ -258,7 +257,7 @@ const handleEdit = useCallback((teacher) => {
       console.error("Error deleting teacher:", err.response?.data || err.message);
     }
   };
-  
+
 
   return (
     <div className="max-w-6xl mx-auto p-4 flex flex-col min-h-[90vh] h-fit">
@@ -316,7 +315,7 @@ const handleEdit = useCallback((teacher) => {
             </thead>
             <tbody className="bg-white divide-y min-w-[320px] divide-gray-200">
               {filteredTeachers.length > 0 ? (
-                filteredTeachers.map((teacher,index) => (
+                filteredTeachers.map((teacher, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">

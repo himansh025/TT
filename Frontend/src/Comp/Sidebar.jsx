@@ -33,7 +33,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 h-screen p-5 border-r-5 border-r-gray-600 text-white fixed top-0 left-0">
+      <aside className="hidden md:flex flex-col w-64 h-screen  p-5 border-r-5 border-r-gray-600 text-white fixed top-0 left-0">
         {/* College Logo and Name Section */}
         <div className="flex items-center justify-center mb-8">
           <Link to="/" className="flex flex-col items-center">
@@ -54,6 +54,10 @@ const Sidebar = () => {
           {/* Non-Logged-In Users */}
           {!user && (
             <>
+            {/* <Link to="home" className={getLinkClasses("/home")}>
+                <IoIosRadio />
+                <span>Home</span>
+              </Link> */}
               <Link to="/" className={getLinkClasses("/")}>
                 <IoIosRadio />
                 <span>Live Lecture</span>
@@ -70,10 +74,7 @@ const Sidebar = () => {
                 <FaSearch />
                 <span>Locate Teacher</span>
               </Link>
-              {/* <Link to="/attendance" className={getLinkClasses("/attendance")}>
-                <FaCalculator />
-                <span>Calculate Attendance</span>
-              </Link> */}
+      
             </>
           )}
 
@@ -115,7 +116,7 @@ const Sidebar = () => {
 
       {/* Mobile */}
       <div className="md:hidden w-full bg-gray-900 mb-10 text-white fixed top-0 left-0 z-50">
-        <div className="flex justify-between items-center p-4">
+        <div className="flex justify-between items-center z-50 p-4">
           <Link to="/" className="flex items-center gap-2">
             <img
               src={logo}

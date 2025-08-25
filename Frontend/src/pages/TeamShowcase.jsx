@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
-import TeamHeader from "../Comp/TeamHeader";
-import TeamMemberCard from "../Comp/TeamMemberCard";
+
+import TeamHeader from "../Comp/Team/TeamHeader";
+import TeamMemberCard from "../Comp/Team/TeamMemberCard";
 
 const TeamShowcase = () => {
   const teamMembers = [
