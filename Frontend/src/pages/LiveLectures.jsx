@@ -18,7 +18,7 @@ const LiveLectures = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCollegeClosed, setIsCollegeClosed] = useState(false);
-
+// console.log(data)
 
   // Load departments and classes from localStorage or API
   useEffect(() => {
@@ -89,12 +89,11 @@ const LiveLectures = () => {
 
   const getLecture = async (clsname) => {
     if (!clsname) return;
-
     setLoading(true);
     setIsCollegeClosed(false);
     try {
       const response = await axiosInstance.post(`/live`, { cls: clsname });
-      console.log(response.data);
+      // console.log(response.data);
       if (response.status !== 200) {
         alert(response.data.message);
         return;
@@ -212,16 +211,16 @@ const LiveLectures = () => {
     }
   };
 
-
+      if(loading){
+     return (<Loader/>)
+  }
 
   // Render special lecture
   const renderSpecialLecture = (lecture, type) => {
     const title = getSpecialLectureTitle(lecture);
     const timeRange = getTimeRange(lecture);
+// console.log("type",type)
 
-      if(loading){
-     retrun (<Loader/>)
-  }
     return (
       <div
         key={lecture.id}
@@ -347,10 +346,10 @@ const LiveLectures = () => {
                 {data.slice(0, 1).map((lecture) => {
                   const isSpecial = isSpecialLecture(lecture);
                   return isSpecial ? (
-                    renderSpecialLecture(lecture, "now")
+                    renderSpecialLecture(lecture,lecture.status)
                   ) : (
                     <>
-                      <RegularLecture lecture={lecture} now="now" />
+                      <RegularLecture lecture={lecture} status={lecture.status} />
                     </>
                   );
                 })}
@@ -365,10 +364,12 @@ const LiveLectures = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {data.slice(1).map((lecture) => {
                     const isSpecial = isSpecialLecture(lecture);
-                    return isSpecial ? (renderSpecialLecture(lecture, "next"))
+                  return isSpecial ? (
+    <div key={lecture.id}>{renderSpecialLecture(lecture, "next")}</div>
+  )
                       : (
                         <>
-                          <RegularLecture lecture={lecture} now="next" />
+                          <RegularLecture key={lecture.id} lecture={lecture} now="next" />
                         </>
                       );
                   })}

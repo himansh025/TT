@@ -29,8 +29,8 @@ function App() {
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
     const token = sessionStorage.getItem("token");
-    console.log("user", user);
-    console.log("token", token);
+    // console.log("user", user);
+    // console.log("token", token);
 
     if (user && token) {
       dispatch(login({ user, token }));

@@ -5,9 +5,8 @@ import {
     IoTimeOutline,
 } from "react-icons/io5";
 
-import React from 'react'
-
-function RegularLecture({lecture, type}) {
+function RegularLecture({lecture, status}) {
+    // console.log(type,lecture)
         // Safe string check function - converts any value to string or returns empty string
   const safeString = (value) => {
     if (value === null || value === undefined) return "";
@@ -22,7 +21,7 @@ function RegularLecture({lecture, type}) {
             >
                 <div className="mb-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        {type === "now" ? "NOW" : "NEXT"}
+                        {lecture.status == "now" ? "NOW" : "NEXT"}
                     </span>
                 </div>
 
@@ -56,7 +55,8 @@ function RegularLecture({lecture, type}) {
             className={` rounded-xl p-4 shadow-xl hover:shadow-2xl hover:scale-105 transition-all bg-white border-l-4 border-blue-500 duration-300 w-full max-w-md mx-auto`}>
             <div className="mb-2">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    {type === "now" ? "NOW" : "NEXT"}
+                    {status=="now"? "NOW" :"NEXT"}
+                
                 </span>
             </div>
 

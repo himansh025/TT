@@ -1,20 +1,19 @@
-import React from 'react'
-
 export default function Loader() {
  return(
      <div
        style={{
-        position: 'fixed',
+        position: '',
         top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
+        left:0 ,
+        width: '',
+        height: '',
         background: 'rgba(255, 255, 255, 0.8)',
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: '',
+        alignItems: '',
         zIndex: 9999,
       }}
+      className='md:ml-auto flex mt-60 md:mt-0  justify-center items-center md:h-full'
     >
      <div style={{ textAlign: 'center' }}>
         <div
