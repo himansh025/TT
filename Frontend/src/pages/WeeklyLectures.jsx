@@ -4,7 +4,7 @@ import { MdFastfood, MdPerson3 } from "react-icons/md";
 import Button from "../Comp/Button";
 import { toast } from "react-toastify";
 import axiosInstance from "../Config/apiconfig";
-import {IoLocationOutline,IoBook,IoTimeOutline} from "react-icons/io5";
+import { IoLocationOutline, IoBook, IoTimeOutline } from "react-icons/io5";
 import Loader from "../Comp/Loader";
 
 const sampleBlocks = ["ET Block"];
@@ -30,7 +30,7 @@ const WeeklyLectures = () => {
     }
     fetchAllClasses();
   }, [selectedBlock]);
-
+  // console.log(schedule)
   const fetchAllClasses = async () => {
     try {
       const response = await axiosInstance.get(`/api/classes/getAll`);
@@ -39,7 +39,7 @@ const WeeklyLectures = () => {
       setClasses(arr);
     } catch (error) {
       toast.error(error.message);
-    }finally{
+    } finally {
       setLoading(false)
     }
   };
@@ -59,7 +59,7 @@ const WeeklyLectures = () => {
 
   const handleFetch = async () => {
     setShowValidation(true);
-    console.log(selectedClass, selectedBlock, selectedDay)
+    // console.log(selectedClass, selectedBlock, selectedDay)
     if (!selectedBlock || !selectedClass || !selectedDay) {
       toast.warning("Please select Block, Class, and Day.");
       return;
@@ -69,21 +69,22 @@ const WeeklyLectures = () => {
     try {
       const payload = { cls: selectedClass, reqday: selectedDay.toLowerCase() };
       const response = await axiosInstance.post(`/weekly`, payload);
-      console.log(response.data);
+      // console.log(response.data);
       toast.success("Fetched Weekly Lectures Successfully");
       setSchedule(transformSchedule(response.data));
     } catch (error) {
       toast.error(error.message);
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
 
- if(loading){
-  return(
-    <Loader/>
-  )}
- 
+  if (loading) {
+    return (
+      <Loader />
+    )
+  }
+
   return (
     <div className="min-h-screen text-gray-800 bg-gray-50 p-6 w-full mx-auto rounded-lg shadow-md">
       <h1 className="text-3xl font-bold text-center mb-6 text-blue-700">Weekly Lectures</h1>
@@ -190,7 +191,7 @@ const WeeklyLectures = () => {
       <div className="text-center">
         <Button
           onClick={handleFetch}
-          text={loading&& selectedClass ? "Loading..." : "Get Lectures"}
+          text={loading && selectedClass ? "Loading..." : "Get Lectures"}
           className="font-semibold px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300"
         />
       </div>
@@ -204,28 +205,28 @@ const WeeklyLectures = () => {
                 key={`${index}-${idx}`}
                 className={` rounded-xl p-4 shadow-xl hover:shadow-2xl hover:scale-105 transition-all bg-white border-l-4 border-blue-500 duration-300 w-full max-w-md mx-auto`}
               >
-              <h3 className="text-lg font-bold mt-2">Lecture No: {item.id}</h3>
+                <h3 className="text-lg font-bold mt-2">Lecture No: {item.id}</h3>
 
-              <div className="flex items-center text-blue-600 font-semibold text-md mb-2">
-              <IoTimeOutline className="w-6 h-6 mr-2 text-blue-500" />              {item.time}
-            </div>
+                <div className="flex items-center text-blue-600 font-semibold text-md mb-2">
+                  <IoTimeOutline className="w-6 h-6 mr-2 text-blue-500" />              {item.time}
+                </div>
 
-            <div className=" justify-between text-sm text-gray-700 mb-2">
-            <div className="flex ">
-            <IoLocationOutline className="w-6 mr-2 h-6 text-blue-500" />
-            Venue :
-            <span className="font-semibold ml-2">{domain.venue}  </span>
-            </div>
+                <div className=" justify-between text-sm text-gray-700 mb-2">
+                  <div className="flex ">
+                    <IoLocationOutline className="w-6 mr-2 h-6 text-blue-500" />
+                    Venue :
+                    <span className="font-semibold ml-2">{domain.venue}  </span>
+                  </div>
 
-            <div className="flex items-center text-lg font-bold  mb-1">
-            <IoBook className="w-6 h-6 mr-3 text-yellow-500" />
-             Subject : {domain.subject.toUpperCase()}
-            </div>
-          </div>
-            <p className="text-sm text-blue-700 font-semibold">
-            Teacher Code: <span className="font-normal">{domain.teacher.toUpperCase()}</span>
-           </p>
-      
+                  <div className="flex items-center text-lg font-bold  mb-1">
+                    <IoBook className="w-6 h-6 mr-3 text-yellow-500" />
+                    Subject : {domain.subject.toUpperCase()}
+                  </div>
+                </div>
+                <p className="text-sm text-blue-700 font-semibold">
+                  Teacher Code: <span className="font-normal">{domain.teacher.toUpperCase()}</span>
+                </p>
+
               </div>
             ));
           }
@@ -265,30 +266,83 @@ const WeeklyLectures = () => {
             );
           }
 
-          if (item.subject 
-            === "FRIDAY MEETING" || item.subject === "DEPARTMENTAL MEETING" || item.venue==="Meeting") {
+          if (item.subject
+            === "FRIDAY MEETING" || item.subject === "DEPARTMENTAL MEETING" || item.venue === "Meeting") {
             return (
               <div
-              key={item.id}
-              className="bg-green-50 border-l-4 border-green-500 rounded-lg p-4 shadow-xl text-center hover:shadow-2xl hover:scale-105 transition-all duration-300"
-            >
-              <div className="p-3 bg-gray-200 rounded-full inline-block">
-                <MdPerson3 className="h-8 w-8" />
+                key={item.id}
+                className="bg-green-50 border-l-4 border-green-500 rounded-lg p-4 shadow-xl text-center hover:shadow-2xl hover:scale-105 transition-all duration-300"
+              >
+                <div className="p-3 bg-gray-200 rounded-full inline-block">
+                  <MdPerson3 className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold mt-2">DEPARTMENTAL Meeting</h3>
+                <p className="text-sm bg-blue-900 text-white px-4 py-2 rounded-full mt-2 inline-block">
+                  Time: {item.time}
+                </p>
               </div>
-              <h3 className="text-lg font-bold mt-2">DEPARTMENTAL Meeting</h3>
-              <p className="text-sm bg-blue-900 text-white px-4 py-2 rounded-full mt-2 inline-block">
-                Time: {item.time}
-              </p>
-            </div>
             );
           }
 
+          if (item.teacher === "Placement" || item.instructor === "Placement") {
+            return (
+              <div
+                key={item.id}
+                className="bg-green-50 border-l-4 border-green-500 rounded-lg p-4 shadow-xl text-center hover:shadow-2xl hover:scale-105 transition-all duration-300"
+              >    
+              <h3 className="text-lg font-bold text-left mt-2">Lecture No: {item.id}</h3>
+
+              
+                                 {/* Time */}
+                            <div className="flex items-center text-blue-600 font-semibold text-md mb-2">
+                              <IoTimeOutline className="w-6 h-6 mr-2 text-blue-500" />              {item.time}
+                            </div>
+
+              {/* Class and Venue */}
+                {item.venue && (
+                  <div className="flex justify-between text-sm text-gray-700 mb-2">
+                    <div className="flex ">
+                      <IoLocationOutline className="w-6 mr-2 h-6 text-blue-500" />
+                      Venue :
+                      <span className="font-semibold ml-2">Placement Session   </span>
+                    </div>
+                  </div>
+                )}
+
+                {item.subject && item.subject == "It's" ?(
+                  <div className="flex items-center text-lg font-bold  mb-1">
+                    <IoBook className="w-6 h-6 mr-3 text-yellow-500" />
+                    Subject : Placement Session
+                  </div>
+                ):(
+          <div className="flex items-center text-lg font-bold  mb-1">
+                <IoBook className="w-6 h-6 mr-3 text-yellow-500" />
+                Subject : {item.subject}
+              </div>
+                )}
+
+                {item.teacher && item.teacher != "Placement" && (
+                  <p className="text-sm text-blue-700 font-semibold">
+                    Teacher Code: <span className="font-normal">{item.teacher}</span>
+                  </p>
+                )}
+
+                {/* Free Lecture Mode */}
+                {item.title.toLowerCase().includes("free") && (
+                  <>
+                    <h3 className="text-xl font-bold">Free Lecture</h3>
+                    <p className="text-sm text-green-600">No scheduled lecture</p>
+                  </>
+                )}
+              </div>
+            );
+          }
           return (
             <div
               key={item.id}
               className={` rounded-xl p-4 shadow-xl hover:shadow-2xl hover:scale-105 transition-all bg-white border-l-4 border-blue-500 duration-300 w-full max-w-md mx-auto`}
             >
-            <h3 className="text-lg font-bold mt-2">Lecture No: {item.id}</h3>
+              <h3 className="text-lg font-bold mt-2">Lecture No: {item.id}</h3>
 
               {/* Time */}
               <div className="flex items-center text-blue-600 font-semibold text-md mb-2">
@@ -306,10 +360,10 @@ const WeeklyLectures = () => {
                 </div>
               )}
 
-                       
+
               <div className="flex items-center text-lg font-bold  mb-1">
-              <IoBook className="w-6 h-6 mr-3 text-yellow-500" />
-               Subject : {item.subject}
+                <IoBook className="w-6 h-6 mr-3 text-yellow-500" />
+                Subject : {item.subject}
               </div>
 
               {item.teacher && (

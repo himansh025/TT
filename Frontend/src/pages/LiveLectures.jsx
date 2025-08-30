@@ -107,6 +107,7 @@ const LiveLectures = () => {
       );
 
       setIsCollegeClosed(isClosedStatus);
+      // console.log(response.data)
       setData(response.data);
       // setData(dummy);
 
